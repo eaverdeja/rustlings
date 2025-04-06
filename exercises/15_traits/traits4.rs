@@ -10,8 +10,16 @@ struct OtherSoftware;
 impl Licensed for SomeSoftware {}
 impl Licensed for OtherSoftware {}
 
-// TODO: Fix the compiler error by only changing the signature of this function.
-fn compare_license_types(software1: ???, software2: ???) -> bool {
+fn compare_license_types<T, U>(software1: T, software2: U) -> bool
+where
+    T: Licensed,
+    U: Licensed,
+{
+    software1.licensing_info() == software2.licensing_info()
+}
+
+// A short-hand would be to use the impl keyword in place of the generic type
+fn compare_license_types_with_impl(software1: impl Licensed, software2: impl Licensed) -> bool {
     software1.licensing_info() == software2.licensing_info()
 }
 
