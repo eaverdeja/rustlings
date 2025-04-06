@@ -23,11 +23,21 @@ fn count_for(map: &HashMap<String, Progress>, value: Progress) -> usize {
     count
 }
 
-// TODO: Implement the functionality of `count_for` but with an iterator instead
-// of a `for` loop.
 fn count_iterator(map: &HashMap<String, Progress>, value: Progress) -> usize {
-    // `map` is a hash map with `String` keys and `Progress` values.
-    // map = { "variables1": Complete, "from_str": None, … }
+    // My first attempt was to resort to fold (as always)
+    map.iter().fold(0, |mut acc, (_, progress)| {
+        if *progress == value {
+            acc += 1;
+        }
+        acc
+    })
+}
+
+fn count_iterator_with_filter(map: &HashMap<String, Progress>, value: Progress) -> usize {
+    // But iterators have a handy count() method which we can combine with filter()
+    map.iter()
+        .filter(|(_, progress)| **progress == value)
+        .count()
 }
 
 fn count_collection_for(collection: &[HashMap<String, Progress>], value: Progress) -> usize {
@@ -42,12 +52,41 @@ fn count_collection_for(collection: &[HashMap<String, Progress>], value: Progres
     count
 }
 
-// TODO: Implement the functionality of `count_collection_for` but with an
-// iterator instead of a `for` loop.
 fn count_collection_iterator(collection: &[HashMap<String, Progress>], value: Progress) -> usize {
-    // `collection` is a slice of hash maps.
-    // collection = [{ "variables1": Complete, "from_str": None, … },
-    //               { "variables2": Complete, … }, … ]
+    // My first attempt here was a double-fold. Kinda gnarly
+    collection.iter().fold(0, |mut acc, elem| {
+        acc += elem.iter().fold(0, |mut acc, (_, progress)| {
+            if *progress == value {
+                acc += 1
+            }
+            acc
+        });
+        acc
+    })
+}
+
+fn count_collection_iterator_with_reuse(
+    collection: &[HashMap<String, Progress>],
+    value: Progress,
+) -> usize {
+    // A more reasonable approach would reuse our count_iterator() function
+    // instead of the inner fold - this is already much better!
+    collection
+        .iter()
+        .fold(0, |acc, elem| acc + count_iterator(elem, value))
+}
+
+fn count_collection_iterator_with_sum(
+    collection: &[HashMap<String, Progress>],
+    value: Progress,
+) -> usize {
+    // But we can do even better using the map() and sum() methods on iterators!
+    // It's one extra-line over the previous solution, but map() + sum() is arguably
+    // less mental overhead than using fold()
+    collection
+        .iter()
+        .map(|elem| count_iterator(elem, value))
+        .sum()
 }
 
 fn main() {
@@ -114,6 +153,10 @@ mod tests {
                 count_for(&map, progress_state),
                 count_iterator(&map, progress_state),
             );
+            assert_eq!(
+                count_for(&map, progress_state),
+                count_iterator_with_filter(&map, progress_state)
+            );
         }
     }
 
@@ -147,6 +190,14 @@ mod tests {
             assert_eq!(
                 count_collection_for(&collection, progress_state),
                 count_collection_iterator(&collection, progress_state),
+            );
+            assert_eq!(
+                count_collection_for(&collection, progress_state),
+                count_collection_iterator_with_reuse(&collection, progress_state)
+            );
+            assert_eq!(
+                count_collection_for(&collection, progress_state),
+                count_collection_iterator_with_sum(&collection, progress_state),
             );
         }
     }

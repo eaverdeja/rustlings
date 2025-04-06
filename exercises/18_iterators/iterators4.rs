@@ -10,6 +10,14 @@ fn factorial(num: u64) -> u64 {
     // - additional variables
     // For an extra challenge, don't use:
     // - recursion
+
+    // My first approach was a range + fold - already pretty succint
+    (1..num + 1).fold(1, |acc, elem| acc * elem)
+}
+
+fn factorial_with_product(num: u64) -> u64 {
+    // But iterators also have a product() method, which is convenient
+    (1..num + 1).product()
 }
 
 fn main() {
@@ -37,5 +45,9 @@ mod tests {
     #[test]
     fn factorial_of_4() {
         assert_eq!(factorial(4), 24);
+    }
+
+    fn factorial_with_product_of_5() {
+        assert_eq!(factorial_with_product(5), 120);
     }
 }
