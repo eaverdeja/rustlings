@@ -23,27 +23,85 @@ enum IntoColorError {
     IntConversion,
 }
 
-// TODO: Tuple implementation.
 // Correct RGB color values must be integers in the 0..=255 range.
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
 
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let (red, green, blue) = tuple;
+        let colors = [red, green, blue].into_iter().map(u8::try_from);
+
+        if colors.clone().any(|color| color.is_err()) {
+            return Err(IntoColorError::IntConversion);
+        };
+
+        let mut colors = colors.map(|color| color.unwrap());
+        let (red, green, blue) = (
+            colors.next().unwrap(),
+            colors.next().unwrap(),
+            colors.next().unwrap(),
+        );
+
+        Ok(Color { red, green, blue })
+    }
 }
 
-// TODO: Array implementation.
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let [red, green, blue] = arr;
+        let colors = [red, green, blue].into_iter().map(u8::try_from);
+
+        if colors.clone().any(|color| color.is_err()) {
+            return Err(IntoColorError::IntConversion);
+        };
+
+        let mut colors = colors.map(|color| color.unwrap());
+
+        let (red, green, blue) = (
+            colors.next().unwrap(),
+            colors.next().unwrap(),
+            colors.next().unwrap(),
+        );
+
+        Ok(Color { red, green, blue })
+    }
 }
 
-// TODO: Slice implementation.
 // This implementation needs to check the slice length.
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        };
+
+        let mut slice = slice.iter();
+        let (red, green, blue) = (
+            slice.next().unwrap(),
+            slice.next().unwrap(),
+            slice.next().unwrap(),
+        );
+
+        let colors = [red, green, blue]
+            .into_iter()
+            .map(|color| u8::try_from(*color));
+
+        if colors.clone().any(|color| color.is_err()) {
+            return Err(IntoColorError::IntConversion);
+        };
+
+        let mut colors = colors.map(|color| color.unwrap());
+        let (red, green, blue) = (
+            colors.next().unwrap(),
+            colors.next().unwrap(),
+            colors.next().unwrap(),
+        );
+
+        Ok(Color { red, green, blue })
+    }
 }
 
 fn main() {

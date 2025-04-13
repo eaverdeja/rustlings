@@ -1,4 +1,4 @@
-use std::mem::{replace, swap};
+use std::mem::replace;
 
 #[rustfmt::skip]
 #[allow(unused_variables, unused_assignments)]
